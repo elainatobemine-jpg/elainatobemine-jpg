@@ -40,7 +40,7 @@ export const PROJECTS_DATA: ProjectItem[] = [
     description:
       'An experimental Pterodactyl-derived server panel with a local process runner, built for personal hosting and development on Linux.',
     image_url:
-      'https://images.unsplash.com/photo-1629654297299-c8506221ca97?w=800&auto=format&fit=crop&q=80',
+      'https://i.postimg.cc/4N9J2NKx/eb7f8842-b635-4609-859b-ac1284551f87.jpg',
     live_url: 'https://github.com/kagenouReal/Pteroless',
     github_url: 'https://github.com/kagenouReal/Pteroless',
     technologies: ['PHP', 'Laravel', 'React', 'TypeScript', 'Tailwind CSS'],
@@ -48,7 +48,6 @@ export const PROJECTS_DATA: ProjectItem[] = [
       'Pterodactyl-derived server management panel',
       'Local process runner for Linux hosts',
       'Personal hosting and development workflow',
-      'React + TypeScript interface',
       'Server-side process management',
     ],
   },
@@ -56,17 +55,15 @@ export const PROJECTS_DATA: ProjectItem[] = [
     id: 'kobeni-md',
     title: 'Kobeni-MD',
     description:
-      'A beta multi-device WhatsApp bot built with Node.js and Baileys, with modular plugins, dynamic command handling, and automation-focused features.',
+      'A multi-device WhatsApp bot built with Node.js and Baileys, with modular plugins and automation-focused features.',
     image_url:
-      'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&auto=format&fit=crop&q=80',
+      'https://i.postimg.cc/ZnYdFvY4/573862b1-f441-4df3-a4a1-77caf5702c3c.jpg',
     live_url: 'https://github.com/kagenouReal/Kobeni-MD',
     github_url: 'https://github.com/kagenouReal/Kobeni-MD',
     technologies: ['Node.js', 'JavaScript', 'Baileys', 'Cheerio', 'WhatsApp'],
     key_features: [
       'Multi-device WhatsApp sessions',
       'Modular plugin system',
-      'Dynamic plugin and handler reloading',
-      'Conversational AI command integration',
       'Public/self access modes',
       'Automation features',
     ],
@@ -77,16 +74,14 @@ export const PROJECTS_DATA: ProjectItem[] = [
     description:
       'A Next.js and TypeScript project combining API utilities, scraping, WhatsApp integrations, scheduled jobs, and SQLite-backed tools.',
     image_url:
-      'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=800&auto=format&fit=crop&q=80',
+      'https://i.postimg.cc/zDLjQ98p/2430d430-31a8-4f61-9564-727f34151c98.jpg',
     live_url: 'https://github.com/kagenouReal/Zqwis-Apis-Backend',
     github_url: 'https://github.com/kagenouReal/Zqwis-Apis-Backend',
     technologies: ['TypeScript', 'Next.js', 'Node.js', 'SQLite', 'Cheerio'],
     key_features: [
       'API and scraping utilities',
       'SQLite data storage',
-      'Scheduled task support',
       'WhatsApp integration via Baileys',
-      'Image and media processing',
       'Next.js + TypeScript',
     ],
   },
@@ -96,17 +91,17 @@ export const CERTIFICATES_DATA: CertificateItem[] = [
   {
     id: 'cert-backend-dev',
     title: 'Backend Systems & API Architecture',
-    image_url: new URL('../assets/images/backend-api-certificate.png', import.meta.url).href,
+    image_url: new URL('../assets/images/backapi-cert.png', import.meta.url).href,
   },
   {
     id: 'cert-automation-bots',
     title: 'Bot Development & Automation',
-    image_url: new URL('../assets/images/bot-development-certificate.png', import.meta.url).href,
+    image_url: new URL('../assets/images/botauto-cert.png', import.meta.url).href,
   },
   {
     id: 'cert-reverse-engineering',
     title: 'Web Scraping & Reverse Engineering',
-    image_url: new URL('../assets/images/reverse-engineering-certificate.png', import.meta.url).href,
+    image_url: new URL('../assets/images/reverseweb-cert.png', import.meta.url).href,
   },
 ];
 

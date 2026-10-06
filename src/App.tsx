@@ -19,6 +19,7 @@ import {
   X,
   ExternalLink,
   Sparkles,
+  Mail,
 } from 'lucide-react';
 import { playHoverSound, playClickSound } from './utils/soundEffects';
 import { TypeText } from './components/TypeText';
@@ -38,6 +39,163 @@ const LanyardCanvas = lazy(() =>
     default: Component,
   }))
 );
+
+function useVelocityScroll(enabled: boolean) {
+  useEffect(() => {
+    if (!enabled) return;
+
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const desktop = window.matchMedia('(min-width: 768px) and (pointer: fine)');
+    if (reducedMotion.matches) return;
+
+    let frameId = 0;
+    let targetY = window.scrollY;
+    let smoothingWheel = false;
+    let lastY = window.scrollY;
+    let lastTime = performance.now();
+    let velocity = 0;
+    const layers = Array.from(document.querySelectorAll<HTMLElement>('[data-scroll-layer]'));
+    const originalTransforms = layers.map((layer) => layer.style.transform);
+    layers.forEach((layer) => {
+      layer.style.willChange = 'transform';
+    });
+
+    const scheduleFrame = () => {
+      if (!frameId) frameId = requestAnimationFrame(updateFrame);
+    };
+
+    const updateFrame = (time: number) => {
+      frameId = 0;
+      const elapsed = Math.min(time - lastTime, 32);
+      lastTime = time;
+
+      if (reducedMotion.matches) {
+        velocity = 0;
+        smoothingWheel = false;
+      }
+
+      if (smoothingWheel) {
+        const currentY = window.scrollY;
+        const amount = 1 - Math.exp(-elapsed / 125);
+        const nextY = currentY + (targetY - currentY) * amount;
+        window.scrollTo({ top: nextY, behavior: 'instant' as ScrollBehavior });
+        if (Math.abs(targetY - nextY) < 0.75) {
+          window.scrollTo({ top: targetY, behavior: 'instant' as ScrollBehavior });
+          smoothingWheel = false;
+        }
+      } else {
+        velocity *= Math.exp(-elapsed / 115);
+      }
+
+      const offset = Math.max(-8, Math.min(8, -velocity * 1.25));
+      layers.forEach((layer) => {
+        const depth = Number(layer.dataset.scrollLayer) || 1;
+        const mobileScale = desktop.matches ? 1 : 0.25;
+        layer.style.transform = `translate3d(0, ${offset * depth * mobileScale}px, 0)`;
+      });
+
+      if (smoothingWheel || Math.abs(velocity) > 0.015) scheduleFrame();
+    };
+
+    const onScroll = () => {
+      const now = performance.now();
+      const currentY = window.scrollY;
+      const elapsed = Math.max(now - lastTime, 1);
+      velocity = (currentY - lastY) / elapsed;
+      lastY = currentY;
+      if (!smoothingWheel) targetY = currentY;
+      scheduleFrame();
+    };
+
+    const canScrollInsideTarget = (target: EventTarget | null, deltaY: number) => {
+      if (!(target instanceof HTMLElement)) return false;
+      let element: HTMLElement | null = target;
+      while (element && element !== document.body) {
+        const { overflowY } = window.getComputedStyle(element);
+        if (
+          (overflowY === 'auto' || overflowY === 'scroll') &&
+          element.scrollHeight > element.clientHeight
+        ) {
+          const canScrollUp = element.scrollTop > 0;
+          const canScrollDown =
+            element.scrollTop + element.clientHeight < element.scrollHeight - 1;
+          if ((deltaY < 0 && canScrollUp) || (deltaY > 0 && canScrollDown)) return true;
+        }
+        element = element.parentElement;
+      }
+      return false;
+    };
+
+    const onWheel = (event: WheelEvent) => {
+      if (
+        reducedMotion.matches ||
+        !desktop.matches ||
+        event.ctrlKey ||
+        Math.abs(event.deltaX) > Math.abs(event.deltaY) ||
+        canScrollInsideTarget(event.target, event.deltaY)
+      ) {
+        return;
+      }
+
+      const pixelDelta = Math.abs(event.deltaY);
+      const isWheelInput =
+        event.deltaMode !== 0 ||
+        (pixelDelta >= 80 &&
+          (Math.abs(pixelDelta % 100) < 1 || Math.abs(pixelDelta % 120) < 1));
+      if (!isWheelInput || !event.cancelable) return;
+
+      event.preventDefault();
+      const multiplier = event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? innerHeight : 1;
+      targetY = Math.max(
+        0,
+        Math.min(
+          document.documentElement.scrollHeight - innerHeight,
+          (smoothingWheel ? targetY : window.scrollY) + event.deltaY * multiplier
+        )
+      );
+      smoothingWheel = true;
+      scheduleFrame();
+    };
+
+    const stopWheelSmoothing = () => {
+      smoothingWheel = false;
+      targetY = window.scrollY;
+      if (reducedMotion.matches) {
+        velocity = 0;
+        layers.forEach((layer, index) => {
+          layer.style.transform = originalTransforms[index];
+        });
+      }
+    };
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (['ArrowDown', 'ArrowUp', 'PageDown', 'PageUp', 'Home', 'End', ' '].includes(event.key)) {
+        stopWheelSmoothing();
+      }
+    };
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('wheel', onWheel, { passive: false });
+    window.addEventListener('touchstart', stopWheelSmoothing, { passive: true });
+    window.addEventListener('keydown', onKeyDown);
+    reducedMotion.addEventListener('change', stopWheelSmoothing);
+    desktop.addEventListener('change', stopWheelSmoothing);
+
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('wheel', onWheel);
+      window.removeEventListener('touchstart', stopWheelSmoothing);
+      window.removeEventListener('keydown', onKeyDown);
+      reducedMotion.removeEventListener('change', stopWheelSmoothing);
+      desktop.removeEventListener('change', stopWheelSmoothing);
+      if (frameId) cancelAnimationFrame(frameId);
+      layers.forEach((layer, index) => {
+        layer.style.transform = originalTransforms[index];
+        layer.style.willChange = '';
+      });
+    };
+  }, [enabled]);
+}
 
 // 1. Responsive Background (Desktop + Mobile Artwork) — Classic Crisp Pixel Backdrop
 function BackgroundOrbs({
@@ -244,7 +402,7 @@ function Navbar({
             className="inline-block w-2.5 h-2.5 animate-pulse"
             style={{ backgroundColor: 'var(--accent)' }}
           />
-          kagenou.dev
+          kagenoureal
         </span>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
@@ -327,7 +485,8 @@ function HeroSection({ showApp }: { showApp: boolean }) {
   return (
     <section
       id="home"
-      className="max-w-7xl mx-auto px-6 md:px-12 pt-20 pb-8 md:pb-10 flex items-center justify-between relative overflow-hidden"
+      data-scroll-layer="0.25"
+      className="max-w-7xl mx-auto px-6 md:px-12 pt-20 pb-8 md:pb-10 flex items-center justify-between relative z-[1] overflow-hidden"
     >
       {/* 3D WebGL Lanyard Canvas (Desktop + HP Mobile) */}
       <div
@@ -557,7 +716,7 @@ function HeroSection({ showApp }: { showApp: boolean }) {
             >
               SCROLL
             </span>
-            <span style={{ fontSize: 11, color: 'var(--accent)' }}>▼</span>
+            <span style={{ fontSize: 11, color: 'var(--accent)' }}>▼            </span>
           </a>
         </motion.div>
       </div>
@@ -589,20 +748,9 @@ const aboutAvatarVariant = {
   },
 };
 
-const aboutCardVariant = {
-  hidden: { opacity: 0, y: 20 },
-  show: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.75, ease: EASE_CURVE },
-  },
-};
-
 function AboutSection({ showApp }: { showApp: boolean }) {
   const [avatarError, setAvatarError] = useState(false);
-  const statsRef = useRef<HTMLDivElement>(null);
   const heatmapRef = useRef<HTMLDivElement>(null);
-  const statsInView = useInView(statsRef, { once: true, amount: 0.1 });
   const heatmapInView = useInView(heatmapRef, { once: true, amount: 0.1 });
 
   const scrollToPortfolio = () => {
@@ -620,23 +768,29 @@ function AboutSection({ showApp }: { showApp: boolean }) {
     },
     {
       icon: <Award size={18} style={{ color: 'var(--accent)' }} />,
-      value: '10+',
-      title: 'STACK',
+      value: String(CERTIFICATES_DATA.length),
+      title: 'CERTIFICATES',
     },
     {
-      icon: <Globe size={18} style={{ color: 'var(--accent)' }} />,
-      value: 'MANY',
-      title: 'EXPERIMENTS',
+      icon: <Award size={18} style={{ color: 'var(--accent)' }} />,
+      value: String(TECH_STACK_DATA.length),
+      title: 'STACK',
     },
   ];
 
   return (
     <section
       id="about"
-      className="w-full max-w-7xl mx-auto px-6 md:px-12 pt-4 pb-6 md:pt-6 md:pb-8"
+      data-scroll-layer="0.5"
+      className="w-full max-w-7xl mx-auto px-6 md:px-12 pt-4 pb-6 md:pt-6 md:pb-8 relative z-[2] -mt-2 md:-mt-4"
       style={{ color: 'var(--text-primary)' }}
     >
-      <div style={{ width: '100%' }}>
+      <motion.div
+        style={{ width: '100%' }}
+        initial={{ opacity: 0, y: 35 }}
+        whileInView={showApp ? { opacity: 1, y: 0 } : undefined}
+        transition={{ duration: 0.8 }}
+      >
         <div
           style={{
             display: 'flex',
@@ -715,6 +869,34 @@ function AboutSection({ showApp }: { showApp: boolean }) {
               Somehow it works. Don&apos;t ask me why.
             </motion.p>
 
+            <motion.div
+              variants={aboutFadeUp}
+              style={{ display: 'flex', gap: 12, marginTop: 20, flexWrap: 'wrap' }}
+            >
+              <a
+                href="https://github.com/kagenouReal"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ textDecoration: 'none' }}
+              >
+                <button
+                  className="modern-btn-primary"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 8,
+                    padding: '12px 20px',
+                    fontSize: 12,
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                  }}
+                >
+                  <FileText size={15} />
+                  GitHub Profile
+                </button>
+              </a>
+            </motion.div>
+
             {/* Quote Card */}
             <motion.div
               variants={{
@@ -743,55 +925,6 @@ function AboutSection({ showApp }: { showApp: boolean }) {
               </span>
             </motion.div>
 
-            <motion.div
-              variants={aboutFadeUp}
-              style={{
-                display: 'flex',
-                gap: 12,
-                marginTop: 24,
-                flexWrap: 'wrap',
-              }}
-            >
-              <a
-                href="https://github.com/kagenouReal"
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{ textDecoration: 'none' }}
-              >
-                <button
-                  className="modern-btn-primary"
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 8,
-                    padding: '12px 20px',
-                    fontSize: 12,
-                    fontWeight: 700,
-                    cursor: 'pointer',
-                  }}
-                >
-                  <FileText size={15} />
-                  GitHub Profile
-                </button>
-              </a>
-
-              <button
-                onClick={scrollToPortfolio}
-                className="modern-btn-secondary"
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 8,
-                  padding: '12px 20px',
-                  fontSize: 12,
-                  fontWeight: 700,
-                  cursor: 'pointer',
-                }}
-              >
-                <ArrowUpRight size={15} />
-                View Projects
-              </button>
-            </motion.div>
           </motion.div>
 
           <motion.div
@@ -855,11 +988,7 @@ function AboutSection({ showApp }: { showApp: boolean }) {
           </motion.div>
         </div>
 
-        <motion.div
-          ref={statsRef}
-          variants={aboutStagger}
-          initial="hidden"
-          animate={showApp && statsInView ? 'show' : 'hidden'}
+        <div
           style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(3, 1fr)',
@@ -870,7 +999,9 @@ function AboutSection({ showApp }: { showApp: boolean }) {
           {stats.map((stat, idx) => (
             <motion.div
               key={idx}
-              variants={aboutCardVariant}
+              initial={{ opacity: 0, x: idx % 2 === 0 ? -30 : 30, y: 20 }}
+              whileInView={showApp ? { opacity: 1, x: 0, y: 0 } : undefined}
+              transition={{ duration: 0.65, delay: 0.05 * idx }}
               whileHover={{ y: -3 }}
               onClick={scrollToPortfolio}
               className="modern-card"
@@ -925,7 +1056,7 @@ function AboutSection({ showApp }: { showApp: boolean }) {
               </div>
             </motion.div>
           ))}
-        </motion.div>
+        </div>
 
         {/* GitHub Heatmap D3 Component */}
         <motion.div
@@ -937,7 +1068,7 @@ function AboutSection({ showApp }: { showApp: boolean }) {
         >
           <GithubHeatmap username="kagenouReal" />
         </motion.div>
-      </div>
+      </motion.div>
     </section>
   );
 }
@@ -1224,7 +1355,8 @@ function PortfolioSection({ showApp }: { showApp: boolean }) {
 
       <section
         id="portfolio"
-        className="w-full max-w-7xl mx-auto px-6 md:px-12 pt-4 pb-8 md:pt-6 md:pb-10"
+        data-scroll-layer="0.75"
+        className="w-full max-w-7xl mx-auto px-6 md:px-12 pt-4 pb-8 md:pt-6 md:pb-10 relative z-[3] -mt-2 md:-mt-4"
         style={{ color: 'var(--text-primary)' }}
       >
         <motion.div
@@ -1247,7 +1379,12 @@ function PortfolioSection({ showApp }: { showApp: boolean }) {
           </p>
         </motion.div>
 
-        <div className="flex justify-center mb-8">
+        <motion.div
+          initial={{ opacity: 0, y: 35 }}
+          whileInView={showApp ? { opacity: 1, y: 0 } : undefined}
+          transition={{ duration: 0.8 }}
+          className="flex justify-center mb-8"
+        >
           <div className="w-full max-w-2xl modern-card p-1.5 flex gap-1.5">
             {(['projects', 'certificates', 'techstack'] as const).map((tab) => {
               const isActive = activeTab === tab;
@@ -1283,7 +1420,7 @@ function PortfolioSection({ showApp }: { showApp: boolean }) {
               );
             })}
           </div>
-        </div>
+        </motion.div>
 
         <AnimatePresence mode="wait">
           <motion.div
@@ -1357,9 +1494,9 @@ function PortfolioSection({ showApp }: { showApp: boolean }) {
                 {CERTIFICATES_DATA.map((cert, idx) => (
                   <motion.div
                     key={cert.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={showApp ? { opacity: 1, y: 0 } : undefined}
-                    transition={{ duration: 0.45, delay: 0.04 * idx }}
+                    initial={{ opacity: 0, x: idx % 2 === 0 ? -30 : 30, y: 20 }}
+                    whileInView={showApp ? { opacity: 1, x: 0, y: 0 } : undefined}
+                    transition={{ duration: 0.65, delay: 0.05 * idx }}
                     whileHover={{ y: -3 }}
                     onClick={() => {
                       setLightboxImage(cert.image_url);
@@ -1423,9 +1560,9 @@ function PortfolioSection({ showApp }: { showApp: boolean }) {
                         {items.map((item, idx) => (
                           <motion.div
                             key={item.id}
-                            initial={{ opacity: 0, y: 20 }}
-                            whileInView={showApp ? { opacity: 1, y: 0 } : undefined}
-                            transition={{ duration: 0.4, delay: 0.04 * idx }}
+                            initial={{ opacity: 0, x: idx % 2 === 0 ? -30 : 30, y: 20 }}
+                            whileInView={showApp ? { opacity: 1, x: 0, y: 0 } : undefined}
+                            transition={{ duration: 0.65, delay: 0.05 * idx }}
                             whileHover={{ y: -2 }}
                             className="group modern-card pixel-dither-hover flex items-center gap-3 min-h-[88px] w-full p-3"
                           >
@@ -1472,15 +1609,6 @@ function PortfolioSection({ showApp }: { showApp: boolean }) {
 }
 
 // 7. Contact Section (Form + Direct Channels)
-const contactItemVariant = {
-  hidden: { opacity: 0, y: 20 },
-  show: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.5, ease: EASE_CURVE },
-  },
-};
-
 function WhatsAppIcon() {
   return (
     <svg
@@ -1529,7 +1657,7 @@ function TelegramIcon() {
   );
 }
 
-function ContactChannelsCard() {
+function ContactChannelsCard({ showApp }: { showApp: boolean }) {
   const socialGridLinks = [
     {
       title: 'WhatsApp',
@@ -1548,6 +1676,14 @@ function ContactChannelsCard() {
       desc: 'Direct chats & messaging',
     },
     {
+      title: 'Email',
+      user: 'kagenoureal@gmail.com',
+      icon: Mail,
+      link: 'mailto:kagenoureal@gmail.com',
+      highlight: false,
+      desc: 'Send me an email',
+    },
+    {
       title: 'TikTok',
       user: '@veryy_lazyy',
       icon: TikTokIcon,
@@ -1560,10 +1696,9 @@ function ContactChannelsCard() {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.7, ease: EASE_CURVE }}
-      viewport={{ once: true, amount: 0.2 }}
-      className="modern-card p-6 sm:p-7 md:p-8 flex flex-col justify-between"
+      whileInView={showApp ? { opacity: 1, y: 0 } : undefined}
+      transition={{ duration: 0.8 }}
+      className="modern-card w-full p-6 sm:p-7 md:p-8 flex flex-col justify-between"
     >
       <div>
         <div className="flex items-center gap-3 mb-4">
@@ -1583,7 +1718,7 @@ function ContactChannelsCard() {
           Open to interesting projects, collabs, automation ideas, API stuff, and technically cursed experiments.
         </p>
 
-        <div className="space-y-3.5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
           {socialGridLinks.map((item, idx) => {
             const IconComp = item.icon;
             return (
@@ -1592,12 +1727,10 @@ function ContactChannelsCard() {
                 href={item.link}
                 target="_blank"
                 rel="noopener noreferrer"
-                variants={contactItemVariant}
-                initial="hidden"
-                whileInView="show"
-                viewport={{ once: true }}
-                transition={{ delay: 0.1 + 0.05 * idx }}
-                className="group modern-card min-h-[76px] p-4 flex items-center justify-between gap-3 transition-transform hover:-translate-y-0.5"
+                initial={{ opacity: 0, x: idx % 2 === 0 ? -30 : 30, y: 20 }}
+                whileInView={showApp ? { opacity: 1, x: 0, y: 0 } : undefined}
+                transition={{ duration: 0.65, delay: 0.05 * idx }}
+                className="group modern-card min-h-[76px] min-w-0 p-4 flex items-center justify-between gap-3 transition-transform hover:-translate-y-0.5"
                 style={{
                   backgroundColor: item.highlight ? 'var(--bg-badge)' : 'var(--bg-card)',
                   borderColor: item.highlight ? 'var(--accent)' : 'var(--border)',
@@ -1614,7 +1747,7 @@ function ContactChannelsCard() {
                   >
                     <IconComp />
                   </div>
-                  <div>
+                  <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
                       <p className="font-pixel-title text-sm" style={{ color: 'var(--text-primary)' }}>
                         {item.title}
@@ -1632,7 +1765,7 @@ function ContactChannelsCard() {
                         </span>
                       )}
                     </div>
-                    <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>
+                    <p className="break-all text-xs" style={{ color: 'var(--text-secondary)' }}>
                       {item.user}
                     </p>
                   </div>
@@ -1666,23 +1799,23 @@ function ContactChannelsCard() {
   );
 }
 
-function ContactSection() {
+function ContactSection({ showApp }: { showApp: boolean }) {
   return (
     <section
       id="contact"
-      className="w-full max-w-7xl mx-auto px-6 md:px-12 pt-4 pb-10 md:pt-6 md:pb-12"
+      data-scroll-layer="1"
+      className="w-full max-w-7xl mx-auto px-6 md:px-12 pt-4 pb-10 md:pt-6 md:pb-12 relative z-[4] -mt-2 md:-mt-4"
       style={{ color: 'var(--text-primary)' }}
     >
       <motion.div
         initial={{ opacity: 0, y: 35 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.7, ease: EASE_CURVE }}
-        viewport={{ once: true, amount: 0.3 }}
+        whileInView={showApp ? { opacity: 1, y: 0 } : undefined}
+        transition={{ duration: 0.8 }}
         className="text-center mb-8 sm:mb-10 lg:mb-12"
       >
         <motion.h1
           initial={{ opacity: 0, y: 35 }}
-          whileInView={{ opacity: 1, y: 0 }}
+          whileInView={showApp ? { opacity: 1, y: 0 } : undefined}
           transition={{ duration: 0.7, ease: EASE_CURVE }}
           viewport={{ once: true }}
           className="font-pixel-title text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-3 sm:mb-4"
@@ -1692,7 +1825,7 @@ function ContactSection() {
         </motion.h1>
         <motion.p
           initial={{ opacity: 0, y: 25 }}
-          whileInView={{ opacity: 1, y: 0 }}
+          whileInView={showApp ? { opacity: 1, y: 0 } : undefined}
           transition={{ duration: 0.7, delay: 0.1, ease: EASE_CURVE }}
           viewport={{ once: true }}
           className="text-sm sm:text-base max-w-xl sm:max-w-2xl mx-auto leading-relaxed"
@@ -1702,8 +1835,8 @@ function ContactSection() {
         </motion.p>
       </motion.div>
 
-      <div className="max-w-3xl mx-auto">
-        <ContactChannelsCard />
+      <div className="w-full">
+        <ContactChannelsCard showApp={showApp} />
       </div>
 
       <div
@@ -1917,6 +2050,8 @@ export default function App() {
   const [backgroundReady, setBackgroundReady] = useState(false);
   const [minimumSplashElapsed, setMinimumSplashElapsed] = useState(false);
 
+  useVelocityScroll(showApp);
+
   const startIntroVoiceAfterSplash = () => {
     const audio = introVoiceRef.current;
     if (!audio || !introVoicePrimedRef.current || introVoiceStartedRef.current) return;
@@ -1924,7 +2059,7 @@ export default function App() {
     introVoiceStartedRef.current = true;
     audio.currentTime = 0;
     audio.loop = false;
-    audio.volume = 0.34816;
+    audio.volume = 0.24816;
     audio.muted = false;
   };
 
@@ -1941,7 +2076,7 @@ export default function App() {
     const backgroundSound = backgroundSoundRef.current;
     if (backgroundSound && backgroundSound.paused) {
       backgroundSound.loop = true;
-      backgroundSound.volume = 0.525;
+      backgroundSound.volume = 0.825;
       void backgroundSound.play().catch((error: unknown) => {
         console.warn('The browser blocked background sound playback:', error);
       });
@@ -2109,7 +2244,7 @@ export default function App() {
         <HeroSection showApp={showApp} />
         <AboutSection showApp={showApp} />
         <PortfolioSection showApp={showApp} />
-        <ContactSection />
+        <ContactSection showApp={showApp} />
       </div>
 
       <AnimatePresence onExitComplete={handleIntroExit}>
