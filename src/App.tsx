@@ -327,7 +327,7 @@ function HeroSection({ showApp }: { showApp: boolean }) {
   return (
     <section
       id="home"
-      className="max-w-7xl mx-auto px-6 md:px-12 pt-20 pb-10 md:pb-12 flex items-center justify-between relative overflow-hidden"
+      className="max-w-7xl mx-auto px-6 md:px-12 pt-20 pb-8 md:pb-10 flex items-center justify-between relative overflow-hidden"
     >
       {/* 3D WebGL Lanyard Canvas (Desktop + HP Mobile) */}
       <div
@@ -633,7 +633,7 @@ function AboutSection({ showApp }: { showApp: boolean }) {
   return (
     <section
       id="about"
-      className="w-full max-w-7xl mx-auto px-6 md:px-12 pt-6 pb-6 md:pt-8 md:pb-8"
+      className="w-full max-w-7xl mx-auto px-6 md:px-12 pt-4 pb-6 md:pt-6 md:pb-8"
       style={{ color: 'var(--text-primary)' }}
     >
       <div style={{ width: '100%' }}>
@@ -707,11 +707,11 @@ function AboutSection({ showApp }: { showApp: boolean }) {
               }}
             >
               I&apos;m mainly into backend development and reverse engineering, with bots, servers, networking, APIs, scraping, Linux, and automation in the mix. I can build web interfaces too, but frontend isn&apos;t my main lane.
-              <br /><br />
+              <br />
               I&apos;m a heavy AI-assisted coder: AI writes a lot of the code; I bring the ideas and prompts, then test, debug, integrate, and iterate until it works.
-              <br /><br />
+              <br />
               Most projects start with &quot;wtf, can I automate this?&quot; I like figuring out how stuff works under the hood, breaking it, fixing it, and somehow shipping the weird result.
-              <br /><br />
+              <br />
               Somehow it works. Don&apos;t ask me why.
             </motion.p>
 
@@ -863,8 +863,8 @@ function AboutSection({ showApp }: { showApp: boolean }) {
           style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(3, 1fr)',
-            gap: 18,
-            marginTop: 32,
+            gap: 16,
+            marginTop: 28,
           }}
         >
           {stats.map((stat, idx) => (
@@ -876,7 +876,7 @@ function AboutSection({ showApp }: { showApp: boolean }) {
               className="modern-card"
               style={{
                 position: 'relative',
-                padding: '22px',
+                padding: '18px',
                 cursor: 'pointer',
               }}
             >
@@ -889,7 +889,7 @@ function AboutSection({ showApp }: { showApp: boolean }) {
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  marginBottom: 14,
+                  marginBottom: 12,
                 }}
               >
                 {stat.icon}
@@ -965,7 +965,7 @@ function ProjectCard({
       className="group relative modern-card p-4 sm:p-5 flex flex-col min-h-[290px]"
     >
       <div
-        className="w-full h-40 overflow-hidden mb-3.5 relative"
+        className="w-full h-36 overflow-hidden mb-3.5 relative"
         style={{
           border: '2px solid var(--border)',
           backgroundColor: 'var(--bg-secondary)',
@@ -1224,14 +1224,14 @@ function PortfolioSection({ showApp }: { showApp: boolean }) {
 
       <section
         id="portfolio"
-        className="w-full max-w-7xl mx-auto px-6 md:px-12 pt-6 pb-8 md:pt-8 md:pb-10"
+        className="w-full max-w-7xl mx-auto px-6 md:px-12 pt-4 pb-8 md:pt-6 md:pb-10"
         style={{ color: 'var(--text-primary)' }}
       >
         <motion.div
           initial={{ opacity: 0, y: 35 }}
           whileInView={showApp ? { opacity: 1, y: 0 } : undefined}
           transition={{ duration: 0.8 }}
-          className="text-center mb-8"
+          className="text-center mb-7"
         >
           <h1
             className="font-pixel-title text-2xl md:text-4xl font-bold mb-3"
@@ -1247,7 +1247,7 @@ function PortfolioSection({ showApp }: { showApp: boolean }) {
           </p>
         </motion.div>
 
-        <div className="flex justify-center mb-10">
+        <div className="flex justify-center mb-8">
           <div className="w-full max-w-2xl modern-card p-1.5 flex gap-1.5">
             {(['projects', 'certificates', 'techstack'] as const).map((tab) => {
               const isActive = activeTab === tab;
@@ -1300,7 +1300,7 @@ function PortfolioSection({ showApp }: { showApp: boolean }) {
                   transition={{ layout: { duration: 0.6, ease: EASE_CURVE } }}
                   className={`grid md:grid-cols-2 ${
                     isPhone ? 'min-[65rem]:grid-cols-3' : 'xl:grid-cols-3'
-                  } gap-6 px-1`}
+                  } gap-5 px-1`}
                 >
                   <AnimatePresence mode="popLayout">
                     {visibleProjects.map((project, idx) => (
@@ -1352,7 +1352,7 @@ function PortfolioSection({ showApp }: { showApp: boolean }) {
               <div
                 className={`grid md:grid-cols-2 ${
                   isPhone ? 'min-[65rem]:grid-cols-3' : 'xl:grid-cols-3'
-                } gap-6 px-1`}
+                } gap-5 px-1`}
               >
                 {CERTIFICATES_DATA.map((cert, idx) => (
                   <motion.div
@@ -1368,7 +1368,7 @@ function PortfolioSection({ showApp }: { showApp: boolean }) {
                     className="group cursor-pointer modern-card p-4"
                   >
                     <div
-                      className="overflow-hidden h-56"
+                      className="overflow-hidden h-52"
                       style={{
                         border: '2px solid var(--border)',
                         backgroundColor: 'var(--bg-secondary)',
@@ -1382,7 +1382,7 @@ function PortfolioSection({ showApp }: { showApp: boolean }) {
                       />
                     </div>
                     <h3
-                      className="font-pixel-title mt-4 text-[13px] text-center"
+                      className="font-pixel-title mt-3 text-[13px] text-center"
                       style={{ color: 'var(--text-primary)' }}
                     >
                       {cert.title}
@@ -1563,27 +1563,27 @@ function ContactChannelsCard() {
       whileInView={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.7, ease: EASE_CURVE }}
       viewport={{ once: true, amount: 0.2 }}
-      className="modern-card p-6 md:p-8 flex flex-col justify-between"
+      className="modern-card p-6 sm:p-7 md:p-8 flex flex-col justify-between"
     >
       <div>
-        <div className="flex items-center gap-2 mb-3">
+        <div className="flex items-center gap-3 mb-4">
           <span
             className="w-2.5 h-2.5 animate-pulse"
             style={{ backgroundColor: 'var(--accent)' }}
           />
           <h2
-            className="font-pixel-title text-xl md:text-2xl font-bold"
+            className="font-pixel-title text-2xl md:text-3xl font-bold"
             style={{ color: 'var(--accent)' }}
           >
             Direct Channels
           </h2>
         </div>
 
-        <p className="text-sm mb-6 leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
+        <p className="text-base mb-7 leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
           Open to interesting projects, collabs, automation ideas, API stuff, and technically cursed experiments.
         </p>
 
-        <div className="space-y-3">
+        <div className="space-y-3.5">
           {socialGridLinks.map((item, idx) => {
             const IconComp = item.icon;
             return (
@@ -1597,15 +1597,15 @@ function ContactChannelsCard() {
                 whileInView="show"
                 viewport={{ once: true }}
                 transition={{ delay: 0.1 + 0.05 * idx }}
-                className="group modern-card p-3.5 flex items-center justify-between transition-transform hover:-translate-y-0.5"
+                className="group modern-card min-h-[76px] p-4 flex items-center justify-between gap-3 transition-transform hover:-translate-y-0.5"
                 style={{
                   backgroundColor: item.highlight ? 'var(--bg-badge)' : 'var(--bg-card)',
                   borderColor: item.highlight ? 'var(--accent)' : 'var(--border)',
                 }}
               >
-                <div className="flex items-center gap-3.5">
+                <div className="flex min-w-0 items-center gap-4">
                   <div
-                    className="w-9 h-9 flex items-center justify-center font-pixel-title text-xs"
+                    className="w-11 h-11 shrink-0 flex items-center justify-center font-pixel-title text-sm"
                     style={{
                       border: '2px solid var(--border)',
                       backgroundColor: 'var(--bg-secondary)',
@@ -1615,13 +1615,13 @@ function ContactChannelsCard() {
                     <IconComp />
                   </div>
                   <div>
-                    <div className="flex items-center gap-2">
-                      <p className="font-pixel-title text-xs" style={{ color: 'var(--text-primary)' }}>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="font-pixel-title text-sm" style={{ color: 'var(--text-primary)' }}>
                         {item.title}
                       </p>
                       {item.highlight && (
                         <span
-                          className="font-pixel-title text-[9px] px-2 py-0.5"
+                          className="font-pixel-title text-[10px] px-2 py-0.5"
                           style={{
                             backgroundColor: 'var(--accent)',
                             color: '#ffffff',
@@ -1632,19 +1632,19 @@ function ContactChannelsCard() {
                         </span>
                       )}
                     </div>
-                    <p className="text-[11.5px]" style={{ color: 'var(--text-secondary)' }}>
+                    <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>
                       {item.user}
                     </p>
                   </div>
                 </div>
                 <div
-                  className="w-8 h-8 flex items-center justify-center modern-card"
+                  className="w-9 h-9 shrink-0 flex items-center justify-center modern-card"
                   style={{
                     backgroundColor: 'var(--bg-secondary)',
                     color: 'var(--accent)',
                   }}
                 >
-                  <ArrowUpRight size={15} />
+                  <ArrowUpRight size={16} />
                 </div>
               </motion.a>
             );
@@ -1653,14 +1653,14 @@ function ContactChannelsCard() {
       </div>
 
       <div
-        className="mt-6 pt-5 flex items-center justify-between text-xs"
+        className="mt-7 pt-5 flex flex-wrap items-center justify-between gap-3 text-xs"
         style={{ borderTop: '2px solid var(--border)', color: 'var(--text-muted)' }}
       >
-        <span className="font-pixel-title text-[10px] flex items-center gap-1.5">
+        <span className="font-pixel-title text-[11px] flex items-center gap-2">
           <Sparkles size={12} style={{ color: 'var(--accent)' }} />
           OPEN TO INTERESTING STUFF
         </span>
-        <span className="font-pixel-title text-[10px]">PROJECTS • COLLABS • WEIRD IDEAS</span>
+        <span className="font-pixel-title text-[11px]">PROJECTS • COLLABS • WEIRD IDEAS</span>
       </div>
     </motion.div>
   );
@@ -1670,7 +1670,7 @@ function ContactSection() {
   return (
     <section
       id="contact"
-      className="w-full max-w-7xl mx-auto px-6 md:px-12 pt-6 pb-10 md:pt-8 md:pb-12"
+      className="w-full max-w-7xl mx-auto px-6 md:px-12 pt-4 pb-10 md:pt-6 md:pb-12"
       style={{ color: 'var(--text-primary)' }}
     >
       <motion.div
@@ -1678,7 +1678,7 @@ function ContactSection() {
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.7, ease: EASE_CURVE }}
         viewport={{ once: true, amount: 0.3 }}
-        className="text-center mb-10 sm:mb-12 lg:mb-14"
+        className="text-center mb-8 sm:mb-10 lg:mb-12"
       >
         <motion.h1
           initial={{ opacity: 0, y: 35 }}
@@ -1702,7 +1702,7 @@ function ContactSection() {
         </motion.p>
       </motion.div>
 
-      <div className="max-w-2xl mx-auto">
+      <div className="max-w-3xl mx-auto">
         <ContactChannelsCard />
       </div>
 
