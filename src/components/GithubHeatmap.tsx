@@ -253,9 +253,9 @@ export const GithubHeatmap: React.FC<GithubHeatmapProps> = ({ username = 'kageno
   }, [data]);
 
   return (
-    <div className="modern-card p-5 md:p-6 w-full relative" ref={containerRef}>
+    <div className="modern-card p-4 md:p-5 w-full relative" ref={containerRef}>
       {/* Header Info */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5 pb-4 border-b-2 border-[var(--border)]">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4 pb-3 border-b-2 border-[var(--border)]">
         <div>
           <div className="flex items-center gap-2 mb-1">
             <GitCommit size={18} className="text-[var(--accent)] animate-pulse" />
@@ -315,7 +315,7 @@ export const GithubHeatmap: React.FC<GithubHeatmapProps> = ({ username = 'kageno
       </div>
 
       {/* Heatmap D3 SVG Container */}
-      <div className="w-full overflow-x-auto custom-scroll pb-2">
+      <div className="w-full overflow-x-auto custom-scroll pb-1">
         {loading ? (
           <div className="h-36 w-full flex items-center justify-center gap-2 font-pixel-title text-xs text-[var(--text-muted)]">
             <RefreshCw size={16} className="animate-spin text-[var(--accent)]" />
@@ -331,7 +331,7 @@ export const GithubHeatmap: React.FC<GithubHeatmapProps> = ({ username = 'kageno
       </div>
 
       {/* Legend */}
-      <div className="flex items-center justify-between mt-4 pt-3 border-t border-[var(--border)] text-[11px] text-[var(--text-muted)]">
+      <div className="flex items-center justify-between mt-3 pt-2 border-t border-[var(--border)] text-[11px] text-[var(--text-muted)]">
         <span className="font-pixel-title text-[10px] text-[var(--accent)]">
           D3.JS HEATMAP ENGINE
         </span>

@@ -633,7 +633,7 @@ function AboutSection({ showApp }: { showApp: boolean }) {
   return (
     <section
       id="about"
-      className="w-full max-w-7xl mx-auto px-6 md:px-12 pt-6 pb-10 md:pt-8 md:pb-12"
+      className="w-full max-w-7xl mx-auto px-6 md:px-12 pt-6 pb-6 md:pt-8 md:pb-8"
       style={{ color: 'var(--text-primary)' }}
     >
       <div style={{ width: '100%' }}>
@@ -864,7 +864,7 @@ function AboutSection({ showApp }: { showApp: boolean }) {
             display: 'grid',
             gridTemplateColumns: 'repeat(3, 1fr)',
             gap: 18,
-            marginTop: 40,
+            marginTop: 32,
           }}
         >
           {stats.map((stat, idx) => (
@@ -933,7 +933,7 @@ function AboutSection({ showApp }: { showApp: boolean }) {
           initial={{ opacity: 0, y: 30 }}
           animate={showApp && heatmapInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
           transition={{ duration: 0.7, delay: 0.2 }}
-          style={{ marginTop: 28 }}
+          style={{ marginTop: 20 }}
         >
           <GithubHeatmap username="kagenouReal" />
         </motion.div>
@@ -1224,7 +1224,7 @@ function PortfolioSection({ showApp }: { showApp: boolean }) {
 
       <section
         id="portfolio"
-        className="w-full max-w-7xl mx-auto px-6 md:px-12 py-8 md:py-12"
+        className="w-full max-w-7xl mx-auto px-6 md:px-12 pt-6 pb-8 md:pt-8 md:pb-10"
         style={{ color: 'var(--text-primary)' }}
       >
         <motion.div
@@ -1670,7 +1670,7 @@ function ContactSection() {
   return (
     <section
       id="contact"
-      className="w-full max-w-7xl mx-auto px-6 md:px-12 py-8 md:py-12"
+      className="w-full max-w-7xl mx-auto px-6 md:px-12 pt-6 pb-10 md:pt-8 md:pb-12"
       style={{ color: 'var(--text-primary)' }}
     >
       <motion.div
@@ -1678,7 +1678,7 @@ function ContactSection() {
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.7, ease: EASE_CURVE }}
         viewport={{ once: true, amount: 0.3 }}
-        className="text-center mb-12 sm:mb-14 lg:mb-16"
+        className="text-center mb-10 sm:mb-12 lg:mb-14"
       >
         <motion.h1
           initial={{ opacity: 0, y: 35 }}
@@ -1707,7 +1707,7 @@ function ContactSection() {
       </div>
 
       <div
-        className="mt-20 text-center font-pixel-title text-xs"
+        className="mt-12 text-center font-pixel-title text-xs"
         style={{ color: 'var(--text-muted)' }}
       >
         © 2026 Kagenou — still shipping somehow.
